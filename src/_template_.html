@@ -1,0 +1,158 @@
+<script type="text/javascript">
+    RED.nodes.registerType('_template_', {
+        category: 'function',
+        color: '#a6bbcf',
+        defaults: {
+            name: { value: '' },
+            enableLogging: { value: true },
+            exampleIn: {
+                value: '',
+                validate: function (v) {
+                    if (!v || v.trim() === '') return false;
+                    var builtInValidator = RED.validators.typedInput('exampleInType');
+                    return builtInValidator.call(this, v);
+                },
+            },
+            exampleInType: { value: 'str' },
+            exampleOut: {
+                value: '',
+                validate: function (v) {
+                    if (!v || v.trim() === '') return false;
+                    var builtInValidator = RED.validators.typedInput('exampleOutType');
+                    return builtInValidator.call(this, v);
+                },
+            },
+            exampleOutType: { value: 'msg' },
+        },
+        oneditprepare: function () {
+            $('#node-input-exampleIn').typedInput({
+                default: 'str',
+                types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
+                typeField: $('#node-input-exampleInType'),
+            });
+            $('#node-input-exampleOut').typedInput({
+                default: 'msg',
+                types: ['msg', 'flow', 'global'],
+                typeField: $('#node-input-exampleOutType'),
+            });
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'font-awesome/fa-cog',
+        label: function () {
+            return this.name || '_template_';
+        },
+    });
+</script>
+
+<style>
+    .flex-checkbox-row {
+        display: flex;
+        align-items: center;
+        padding-left: 104px;
+        margin-bottom: 12px;
+    }
+
+    .flex-checkbox-row input[type='checkbox'] {
+        width: auto !important;
+        margin: 0 8px 0 0 !important;
+    }
+
+    .flex-checkbox-row label {
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    fieldset.node-red-fieldset {
+        border: 1px solid var(--red-ui-form-input-border-color, #ccc) !important;
+        padding: 12px !important;
+        margin-bottom: 12px !important;
+        border-radius: 4px !important;
+    }
+
+    fieldset.node-red-fieldset legend {
+        border-bottom: none !important;
+        width: auto !important;
+        padding: 0 5px !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: var(--red-ui-primary-text-color, #555) !important;
+        margin-bottom: 0 !important;
+    }
+
+    .input-width-70 {
+        width: 70% !important;
+    }
+</style>
+
+<script type="text/html" data-template-name="_template_">
+    <div class="form-row">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i>
+            Name
+        </label>
+        <input type="text" id="node-input-name" class="input-width-70" placeholder="Name" />
+    </div>
+
+    <fieldset id="file-options-group" class="node-red-fieldset">
+        <legend>File Options</legend>
+
+        <div class="form-row flex-checkbox-row">
+            <input type="checkbox" id="node-input-enableLogging" />
+            <label for="node-input-enableLogging">Enable Logging</label>
+        </div>
+
+        <div class="form-row">
+            <label for="node-input-exampleIn">
+                <i class="fa fa-sign-in"></i>
+                Example In
+            </label>
+            <input
+                type="text"
+                id="node-input-exampleIn"
+                class="input-width-70"
+                placeholder="Input property"
+            />
+            <input type="hidden" id="node-input-exampleInType" />
+        </div>
+
+        <div class="form-row">
+            <label for="node-input-exampleOut">
+                <i class="fa fa-sign-out"></i>
+                Example Out
+            </label>
+            <input
+                type="text"
+                id="node-input-exampleOut"
+                class="input-width-70"
+                placeholder="Output property"
+            />
+            <input type="hidden" id="node-input-exampleOutType" />
+        </div>
+    </fieldset>
+</script>
+
+<!-- @formatter:off -->
+<!-- prettier-ignore -->
+<script type="text/markdown" data-help-name="_template_">
+A custom node that reads a string, increments any trailing number, and writes the result to a specified output.
+
+### Properties
+
+- **Name** _string_ \
+  The label of the node in the workspace.
+
+- **Enable Logging** _boolean_ \
+  If checked, logs the incoming `msg.payload` to the Node-RED debug console.
+
+- **Example In** _string | msg | flow | global | jsonata | env_ \
+  The source property containing the string to be evaluated (e.g., "name 1").
+
+- **Example Out** _msg | flow | global_ \
+  The destination property where the incremented string (e.g., "name 2") will be stored.
+
+### Details
+
+This node reads a value from the **Example In** configuration. If the retrieved value is a string ending with a number, it isolates the text, increments the number by 1, and saves the new string to the location defined by **Example Out**. The message is then passed to the output unmodified.
+</script>
+<!-- @formatter:on -->
