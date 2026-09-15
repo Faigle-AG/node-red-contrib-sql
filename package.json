@@ -1,7 +1,7 @@
 {
-  "name": "@faigle/node-red-contrib-_template_",
-  "version": "0.2.8",
-  "description": "Template/Example node for Node-Red",
+  "name": "@faigle/node-red-contrib-sql",
+  "version": "0.1.0",
+  "description": "SQL connector node",
   "keywords": [
     "node-red"
   ],
@@ -9,7 +9,8 @@
   "license": "MIT",
   "node-red": {
     "nodes": {
-      "_template_": "src/_template_.js"
+      "sql-config": "src/sql-config.js",
+      "sql-query": "src/sql-query.js"
     }
   },
   "devDependencies": {
@@ -29,7 +30,10 @@
     "prettier": "^3.9.4"
   },
   "dependencies": {
-    "@faigle/node-red-runtime-utils": "^0.4.3"
+    "@faigle/node-red-runtime-utils": "^0.4.3",
+    "pg": "^8.23.0",
+    "mysql2": "^3.24.4",
+    "mssql": "^12.7.1"
   },
   "workspaces": [
     "../../node-red-runtime/*"

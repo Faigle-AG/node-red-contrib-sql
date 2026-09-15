@@ -1,0 +1,62 @@
+[
+  {
+    "id": "sqlms001",
+    "type": "inject",
+    "name": "Find customer",
+    "props": [
+      {
+        "p": "params",
+        "v": "{\"id\": \"K0001\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 160,
+    "y": 120,
+    "wires": [
+      [
+        "sqlms002"
+      ]
+    ]
+  },
+  {
+    "id": "sqlms002",
+    "type": "database-sql-query",
+    "name": "SQL Server customer query",
+    "config": "sqlms000",
+    "statement": "SELECT * FROM customers WHERE id = @id",
+    "statementType": "str",
+    "parameters": "params",
+    "parametersType": "msg",
+    "output": "payload",
+    "outputType": "msg",
+    "timeoutMs": 30000,
+    "enableLogging": false,
+    "x": 430,
+    "y": 120,
+    "wires": [
+      [
+        "sqlms003"
+      ]
+    ]
+  },
+  {
+    "id": "sqlms003",
+    "type": "debug",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 730,
+    "y": 120,
+    "wires": []
+  }
+]

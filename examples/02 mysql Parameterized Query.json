@@ -1,0 +1,62 @@
+[
+  {
+    "id": "sqlmy001",
+    "type": "inject",
+    "name": "Find customer",
+    "props": [
+      {
+        "p": "params",
+        "v": "[\"K0001\"]",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 160,
+    "y": 120,
+    "wires": [
+      [
+        "sqlmy002"
+      ]
+    ]
+  },
+  {
+    "id": "sqlmy002",
+    "type": "database-sql-query",
+    "name": "MySQL customer query",
+    "config": "sqlmy000",
+    "statement": "SELECT * FROM customers WHERE id = ?",
+    "statementType": "str",
+    "parameters": "params",
+    "parametersType": "msg",
+    "output": "payload",
+    "outputType": "msg",
+    "timeoutMs": 30000,
+    "enableLogging": false,
+    "x": 430,
+    "y": 120,
+    "wires": [
+      [
+        "sqlmy003"
+      ]
+    ]
+  },
+  {
+    "id": "sqlmy003",
+    "type": "debug",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload.data",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 730,
+    "y": 120,
+    "wires": []
+  }
+]
