@@ -20,13 +20,13 @@ The outgoing message contains:
 
 ```json
 {
-  "payload": {
-    "data": [{ "value": 1 }],
-    "driver": "postgres",
-    "rowCount": 1,
-    "rowsAffected": 1,
-    "command": "SELECT"
-  }
+    "payload": {
+        "data": [{ "value": 1 }],
+        "driver": "postgres",
+        "rowCount": 1,
+        "rowsAffected": 1,
+        "command": "SELECT"
+    }
 }
 ```
 
@@ -36,30 +36,30 @@ This example shows PostgreSQL metadata. The driver name and additional metadata 
 
 Reuse one **SQL Connection** in multiple query nodes that access the same database.
 
-| Setting | Purpose |
-| --- | --- |
-| Driver | PostgreSQL, MySQL / MariaDB, or Microsoft SQL Server. |
-| Host | Database server hostname or IP address. |
-| Port | Defaults to 5432 for PostgreSQL, 3306 for MySQL / MariaDB, or 1433 for SQL Server. |
-| Database | Database to connect to. |
-| Username / Password | Database credentials. The password is stored in Node-RED's credential storage. Leave it blank only when the server permits passwordless authentication. |
-| Use TLS | Encrypt the database connection. |
-| Allow self-signed / untrusted server certificate | Allow a certificate that cannot be verified. Enable only when you trust the server and its certificate setup. |
-| Max Connections | Maximum number of connections shared by the query nodes. Default: 10. |
-| Connect (ms) | Connection timeout in milliseconds. Default: 10000. |
-| Idle (ms) | Idle connection timeout in milliseconds. Default: 30000. Set to 0 to retain idle connections. |
+| Setting                                          | Purpose                                                                                                                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Driver                                           | PostgreSQL, MySQL / MariaDB, or Microsoft SQL Server.                                                                                                   |
+| Host                                             | Database server hostname or IP address.                                                                                                                 |
+| Port                                             | Defaults to 5432 for PostgreSQL, 3306 for MySQL / MariaDB, or 1433 for SQL Server.                                                                      |
+| Database                                         | Database to connect to.                                                                                                                                 |
+| Username / Password                              | Database credentials. The password is stored in Node-RED's credential storage. Leave it blank only when the server permits passwordless authentication. |
+| Use TLS                                          | Encrypt the database connection.                                                                                                                        |
+| Allow self-signed / untrusted server certificate | Allow a certificate that cannot be verified. Enable only when you trust the server and its certificate setup.                                           |
+| Max Connections                                  | Maximum number of connections shared by the query nodes. Default: 10.                                                                                   |
+| Connect (ms)                                     | Connection timeout in milliseconds. Default: 10000.                                                                                                     |
+| Idle (ms)                                        | Idle connection timeout in milliseconds. Default: 30000. Set to 0 to retain idle connections.                                                           |
 
 Connections open when the first query arrives and are reused for subsequent queries.
 
 ## Configure a query
 
-| Setting | Purpose |
-| --- | --- |
-| SQL | A SQL string, a message/context property containing SQL, a JSONata expression, or an environment variable. |
-| Parameters | Values to bind to the query. Read them from a message, flow/global context, JSON, JSONata, or an environment variable. Leave blank when the query has no parameters. |
-| Timeout (ms) | Query timeout in milliseconds. Default: 30000. |
-| Output To | Write the result to a message property or flow/global context. Default: `msg.payload`. Named context stores are supported. |
-| Enable query metadata logging | Log the database driver and parameter count. SQL text and parameter values are not logged by this option. |
+| Setting                       | Purpose                                                                                                                                                              |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SQL                           | A SQL string, a message/context property containing SQL, a JSONata expression, or an environment variable.                                                           |
+| Parameters                    | Values to bind to the query. Read them from a message, flow/global context, JSON, JSONata, or an environment variable. Leave blank when the query has no parameters. |
+| Timeout (ms)                  | Query timeout in milliseconds. Default: 30000.                                                                                                                       |
+| Output To                     | Write the result to a message property or flow/global context. Default: `msg.payload`. Named context stores are supported.                                           |
+| Enable query metadata logging | Log the database driver and parameter count. SQL text and parameter values are not logged by this option.                                                            |
 
 To read SQL from `msg.topic`, select the `msg` type for **SQL** and enter `topic`. To read parameters from `msg.params`, select the `msg` type for **Parameters** and enter `params`.
 
@@ -133,11 +133,11 @@ Parameters represent values, not table names, column names, or SQL keywords. Use
 
 ```json
 {
-  "data": [{ "id": "K0001", "name": "Ada" }],
-  "driver": "postgres",
-  "rowCount": 1,
-  "rowsAffected": 1,
-  "command": "SELECT"
+    "data": [{ "id": "K0001", "name": "Ada" }],
+    "driver": "postgres",
+    "rowCount": 1,
+    "rowsAffected": 1,
+    "command": "SELECT"
 }
 ```
 
@@ -145,15 +145,15 @@ Read the rows from `msg.payload.data`, the row count from `msg.payload.rowCount`
 
 If **Output To** is `msg.result`, those paths become `msg.result.data`, `msg.result.rowCount`, and `msg.result.rowsAffected`. Flow/global context receives the same complete object at the selected key.
 
-| Field | Contents |
-| --- | --- |
-| `data` | Array of returned rows; the first recordset for SQL Server. Statements without returned rows produce an empty array. |
-| `driver` | `postgres`, `mysql`, or `mssql`. |
-| `rowCount` | PostgreSQL's reported row count, or the number of returned rows for MySQL / SQL Server. |
-| `rowsAffected` | Affected-row count reported by the driver, or returned-row count where applicable. |
-| `command` | PostgreSQL command name, when available. |
-| `fields` | PostgreSQL or MySQL field information, when available. |
-| `insertId` | MySQL insert ID, when returned by the database. |
+| Field          | Contents                                                                                                             |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `data`         | Array of returned rows; the first recordset for SQL Server. Statements without returned rows produce an empty array. |
+| `driver`       | `postgres`, `mysql`, or `mssql`.                                                                                     |
+| `rowCount`     | PostgreSQL's reported row count, or the number of returned rows for MySQL / SQL Server.                              |
+| `rowsAffected` | Affected-row count reported by the driver, or returned-row count where applicable.                                   |
+| `command`      | PostgreSQL command name, when available.                                                                             |
+| `fields`       | PostgreSQL or MySQL field information, when available.                                                               |
+| `insertId`     | MySQL insert ID, when returned by the database.                                                                      |
 
 All result fields are stored together under **Output To**. Other incoming message properties are preserved except where the selected output writes a value.
 

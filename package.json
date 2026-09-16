@@ -1,6 +1,6 @@
 {
   "name": "@faigle/node-red-contrib-sql",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "SQL connector node",
   "keywords": [
     "node-red"

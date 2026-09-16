@@ -1,192 +1,183 @@
 <script type="text/javascript">
-  (function () {
-    function integerValidator(label, minimum, maximum) {
-      return function (v, opt) {
-        var number = Number(v);
-        var valid =
-          (typeof v === "string" || typeof v === "number") &&
-          String(v).trim() !== "" &&
-          Number.isSafeInteger(number) &&
-          number >= minimum &&
-          number <= maximum;
-        return (
-          valid ||
-          (opt
-            ? label + " must be an integer from " + minimum + " to " + maximum
-            : false)
-        );
-      };
-    }
+    (function () {
+        function integerValidator(label, minimum, maximum) {
+            return function (v, opt) {
+                var number = Number(v);
+                var valid =
+                    (typeof v === 'string' || typeof v === 'number') &&
+                    String(v).trim() !== '' &&
+                    Number.isSafeInteger(number) &&
+                    number >= minimum &&
+                    number <= maximum;
+                return (
+                    valid ||
+                    (opt ? label + ' must be an integer from ' + minimum + ' to ' + maximum : false)
+                );
+            };
+        }
 
-    function typedValidator(typeField, fallbackType, allowedTypes, allowBlank) {
-      return function (v, opt) {
-        var type = this[typeField] || fallbackType;
-        var input = $("#node-input-" + typeField);
-        var stack = RED.editor.getEditStack();
-        var editingThisNode = stack.some(function (node) {
-          return node.id === this.id;
-        }, this);
-        if (editingThisNode && input.length) type = input.val() || type;
-        if (allowedTypes.indexOf(type) === -1)
-          return opt ? "Unsupported type: " + type : false;
-        if (allowBlank && (v === "" || v === undefined || v === null))
-          return true;
-        if (typeof v !== "string" || !v.trim())
-          return opt ? "A non-empty value is required" : false;
-        return RED.validators.typedInput({ type: type }).call(this, v, opt);
-      };
-    }
+        function typedValidator(typeField, fallbackType, allowedTypes, allowBlank) {
+            return function (v, opt) {
+                var type = this[typeField] || fallbackType;
+                var input = $('#node-input-' + typeField);
+                var stack = RED.editor.getEditStack();
+                var editingThisNode = stack.some(function (node) {
+                    return node.id === this.id;
+                }, this);
+                if (editingThisNode && input.length) type = input.val() || type;
+                if (allowedTypes.indexOf(type) === -1)
+                    return opt ? 'Unsupported type: ' + type : false;
+                if (allowBlank && (v === '' || v === undefined || v === null)) return true;
+                if (typeof v !== 'string' || !v.trim())
+                    return opt ? 'A non-empty value is required' : false;
+                return RED.validators.typedInput({ type: type }).call(this, v, opt);
+            };
+        }
 
-    RED.nodes.registerType("database-sql-query", {
-      category: "storage",
-      color: "#5C6B73",
-      paletteLabel: "SQL - Query",
-      defaults: {
-        name: { value: "" },
-        config: {
-          value: "",
-          type: "database-sql-config",
-          required: true,
-          label: "SQL Connection",
-        },
-        statement: {
-          value: "SELECT 1",
-          required: true,
-          label: "Statement",
-          validate: typedValidator(
-            "statementType",
-            "str",
-            ["str", "msg", "flow", "global", "jsonata", "env"],
-            false,
-          ),
-        },
-        statementType: { value: "str" },
-        parameters: {
-          value: "params",
-          required: false,
-          label: "Parameters",
-          validate: typedValidator(
-            "parametersType",
-            "msg",
-            ["msg", "flow", "global", "json", "jsonata", "env"],
-            true,
-          ),
-        },
-        parametersType: { value: "msg" },
-        output: {
-          value: "payload",
-          required: true,
-          label: "Output",
-          validate: typedValidator(
-            "outputType",
-            "msg",
-            ["msg", "flow", "global"],
-            false,
-          ),
-        },
-        outputType: { value: "msg" },
-        timeoutMs: {
-          value: 30000,
-          required: true,
-          label: "Query timeout",
-          validate: integerValidator("Query timeout", 1, 2147483647),
-        },
-        enableLogging: { value: false },
-      },
-      inputs: 1,
-      outputs: 1,
-      icon: "font-awesome/fa-database",
-      label: function () {
-        return this.name || "SQL - Query";
-      },
-      oneditprepare: function () {
-        $("#node-input-statement").typedInput({
-          default: "str",
-          types: ["str", "msg", "flow", "global", "jsonata", "env"],
-          typeField: $("#node-input-statementType"),
+        RED.nodes.registerType('database-sql-query', {
+            category: 'storage',
+            color: '#5C6B73',
+            paletteLabel: 'SQL - Query',
+            defaults: {
+                name: { value: '' },
+                config: {
+                    value: '',
+                    type: 'database-sql-config',
+                    required: true,
+                    label: 'SQL Connection',
+                },
+                statement: {
+                    value: 'SELECT 1',
+                    required: true,
+                    label: 'Statement',
+                    validate: typedValidator(
+                        'statementType',
+                        'str',
+                        ['str', 'msg', 'flow', 'global', 'jsonata', 'env'],
+                        false,
+                    ),
+                },
+                statementType: { value: 'str' },
+                parameters: {
+                    value: 'params',
+                    required: false,
+                    label: 'Parameters',
+                    validate: typedValidator(
+                        'parametersType',
+                        'msg',
+                        ['msg', 'flow', 'global', 'json', 'jsonata', 'env'],
+                        true,
+                    ),
+                },
+                parametersType: { value: 'msg' },
+                output: {
+                    value: 'payload',
+                    required: true,
+                    label: 'Output',
+                    validate: typedValidator('outputType', 'msg', ['msg', 'flow', 'global'], false),
+                },
+                outputType: { value: 'msg' },
+                timeoutMs: {
+                    value: 30000,
+                    required: true,
+                    label: 'Query timeout',
+                    validate: integerValidator('Query timeout', 1, 2147483647),
+                },
+                enableLogging: { value: false },
+            },
+            inputs: 1,
+            outputs: 1,
+            icon: 'font-awesome/fa-database',
+            label: function () {
+                return this.name || 'SQL - Query';
+            },
+            oneditprepare: function () {
+                $('#node-input-statement').typedInput({
+                    default: 'str',
+                    types: ['str', 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    typeField: $('#node-input-statementType'),
+                });
+                $('#node-input-parameters').typedInput({
+                    default: 'msg',
+                    types: ['msg', 'flow', 'global', 'json', 'jsonata', 'env'],
+                    typeField: $('#node-input-parametersType'),
+                });
+                $('#node-input-output').typedInput({
+                    default: 'msg',
+                    types: ['msg', 'flow', 'global'],
+                    typeField: $('#node-input-outputType'),
+                });
+            },
         });
-        $("#node-input-parameters").typedInput({
-          default: "msg",
-          types: ["msg", "flow", "global", "json", "jsonata", "env"],
-          typeField: $("#node-input-parametersType"),
-        });
-        $("#node-input-output").typedInput({
-          default: "msg",
-          types: ["msg", "flow", "global"],
-          typeField: $("#node-input-outputType"),
-        });
-      },
-    });
-  })();
+    })();
 </script>
 
-<link
-  rel="stylesheet"
-  href="resources/@faigle/node-red-runtime-utils/editor.css"
-/>
+<link rel="stylesheet" href="resources/@faigle/node-red-runtime-utils/editor.css" />
 
 <script type="text/html" data-template-name="database-sql-query">
-  <div class="faigle-node-editor">
-    <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-      <input type="text" id="node-input-name" placeholder="SQL - Query" />
+    <div class="faigle-node-editor">
+        <div class="form-row">
+            <label for="node-input-name">
+                <i class="fa fa-tag"></i>
+                Name
+            </label>
+            <input type="text" id="node-input-name" placeholder="SQL - Query" />
+        </div>
+
+        <fieldset class="node-red-fieldset">
+            <legend>Database</legend>
+            <div class="form-row config-node-row">
+                <label for="node-input-config">
+                    <i class="fa fa-cogs"></i>
+                    SQL Connection
+                </label>
+                <input type="text" id="node-input-config" />
+            </div>
+        </fieldset>
+
+        <fieldset class="node-red-fieldset">
+            <legend>Query</legend>
+            <div class="form-row">
+                <label for="node-input-statement">
+                    <i class="fa fa-code"></i>
+                    SQL
+                </label>
+                <input type="text" id="node-input-statement" />
+                <input type="hidden" id="node-input-statementType" />
+            </div>
+            <div class="form-row">
+                <label for="node-input-parameters">
+                    <i class="fa fa-list"></i>
+                    Parameters
+                </label>
+                <input type="text" id="node-input-parameters" />
+                <input type="hidden" id="node-input-parametersType" />
+            </div>
+            <div class="form-row">
+                <label for="node-input-timeoutMs">
+                    <i class="fa fa-clock-o"></i>
+                    Timeout (ms)
+                </label>
+                <input type="number" id="node-input-timeoutMs" min="1" step="1" max="2147483647" />
+            </div>
+        </fieldset>
+
+        <fieldset class="node-red-fieldset">
+            <legend>Output</legend>
+            <div class="form-row">
+                <label for="node-input-output">
+                    <i class="fa fa-sign-out"></i>
+                    Output To
+                </label>
+                <input type="text" id="node-input-output" />
+                <input type="hidden" id="node-input-outputType" />
+            </div>
+            <div class="form-row flex-checkbox-row">
+                <input type="checkbox" id="node-input-enableLogging" />
+                <label for="node-input-enableLogging">Enable query metadata logging</label>
+            </div>
+        </fieldset>
     </div>
-
-    <fieldset class="node-red-fieldset">
-      <legend>Database</legend>
-      <div class="form-row config-node-row">
-        <label for="node-input-config"
-          ><i class="fa fa-cogs"></i> SQL Connection</label
-        >
-        <input type="text" id="node-input-config" />
-      </div>
-    </fieldset>
-
-    <fieldset class="node-red-fieldset">
-      <legend>Query</legend>
-      <div class="form-row">
-        <label for="node-input-statement"><i class="fa fa-code"></i> SQL</label>
-        <input type="text" id="node-input-statement" />
-        <input type="hidden" id="node-input-statementType" />
-      </div>
-      <div class="form-row">
-        <label for="node-input-parameters"
-          ><i class="fa fa-list"></i> Parameters</label
-        >
-        <input type="text" id="node-input-parameters" />
-        <input type="hidden" id="node-input-parametersType" />
-      </div>
-      <div class="form-row">
-        <label for="node-input-timeoutMs"
-          ><i class="fa fa-clock-o"></i> Timeout (ms)</label
-        >
-        <input
-          type="number"
-          id="node-input-timeoutMs"
-          min="1"
-          step="1"
-          max="2147483647"
-        />
-      </div>
-    </fieldset>
-
-    <fieldset class="node-red-fieldset">
-      <legend>Output</legend>
-      <div class="form-row">
-        <label for="node-input-output"
-          ><i class="fa fa-sign-out"></i> Output To</label
-        >
-        <input type="text" id="node-input-output" />
-        <input type="hidden" id="node-input-outputType" />
-      </div>
-      <div class="form-row flex-checkbox-row">
-        <input type="checkbox" id="node-input-enableLogging" />
-        <label for="node-input-enableLogging"
-          >Enable query metadata logging</label
-        >
-      </div>
-    </fieldset>
-  </div>
 </script>
 
 <!-- @formatter:off -->

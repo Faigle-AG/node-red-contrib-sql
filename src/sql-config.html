@@ -1,243 +1,234 @@
 <script type="text/javascript">
-  (function () {
-    function integerValidator(label, minimum, maximum) {
-      return function (v, opt) {
-        var number = Number(v);
-        var valid =
-          (typeof v === "string" || typeof v === "number") &&
-          String(v).trim() !== "" &&
-          Number.isSafeInteger(number) &&
-          number >= minimum &&
-          number <= maximum;
-        return (
-          valid ||
-          (opt
-            ? label + " must be an integer from " + minimum + " to " + maximum
-            : false)
-        );
-      };
-    }
-
-    RED.nodes.registerType("database-sql-config", {
-      category: "config",
-      defaults: {
-        name: { value: "" },
-        driver: {
-          value: "postgres",
-          required: true,
-          label: "Driver",
-          validate: function (v) {
-            return ["postgres", "mysql", "mssql"].indexOf(v) !== -1;
-          },
-        },
-        host: {
-          value: "",
-          required: true,
-          label: "Host",
-          validate: function (v) {
-            return typeof v === "string" && v.trim() !== "";
-          },
-        },
-        port: {
-          value: 5432,
-          required: true,
-          label: "Port",
-          validate: integerValidator("Port", 1, 65535),
-        },
-        database: {
-          value: "",
-          required: true,
-          label: "Database",
-          validate: function (v) {
-            return typeof v === "string" && v.trim() !== "";
-          },
-        },
-        username: {
-          value: "",
-          required: true,
-          label: "Username",
-          validate: function (v) {
-            return typeof v === "string" && v.trim() !== "";
-          },
-        },
-        ssl: { value: false },
-        allowSelfSigned: { value: false },
-        poolMax: {
-          value: 10,
-          required: true,
-          label: "Max connections",
-          validate: integerValidator("Max connections", 1, 2147483647),
-        },
-        connectionTimeoutMs: {
-          value: 10000,
-          required: true,
-          label: "Connect timeout",
-          validate: integerValidator("Connect timeout", 1, 2147483647),
-        },
-        idleTimeoutMs: {
-          value: 30000,
-          required: true,
-          label: "Idle timeout",
-          validate: integerValidator("Idle timeout", 0, 2147483647),
-        },
-      },
-      credentials: {
-        password: { type: "password" },
-      },
-      label: function () {
-        return this.name || this.database || "SQL Connection";
-      },
-      oneditprepare: function () {
-        var defaultPorts = { postgres: 5432, mysql: 3306, mssql: 1433 };
-        var previousDriver = this.driver || "postgres";
-
-        $("#node-config-input-driver").on("change", function () {
-          var driver = $(this).val();
-          var currentPort = Number($("#node-config-input-port").val());
-          var previousDefault = defaultPorts[previousDriver];
-          if (!currentPort || currentPort === previousDefault) {
-            $("#node-config-input-port").val(defaultPorts[driver]);
-          }
-          previousDriver = driver;
-        });
-
-        function updateTlsRows() {
-          $("#row-allow-self-signed").toggle(
-            $("#node-config-input-ssl").prop("checked"),
-          );
+    (function () {
+        function integerValidator(label, minimum, maximum) {
+            return function (v, opt) {
+                var number = Number(v);
+                var valid =
+                    (typeof v === 'string' || typeof v === 'number') &&
+                    String(v).trim() !== '' &&
+                    Number.isSafeInteger(number) &&
+                    number >= minimum &&
+                    number <= maximum;
+                return (
+                    valid ||
+                    (opt ? label + ' must be an integer from ' + minimum + ' to ' + maximum : false)
+                );
+            };
         }
 
-        $("#node-config-input-ssl").on("change", updateTlsRows);
-        updateTlsRows();
-      },
-    });
-  })();
+        RED.nodes.registerType('database-sql-config', {
+            category: 'config',
+            defaults: {
+                name: { value: '' },
+                driver: {
+                    value: 'postgres',
+                    required: true,
+                    label: 'Driver',
+                    validate: function (v) {
+                        return ['postgres', 'mysql', 'mssql'].indexOf(v) !== -1;
+                    },
+                },
+                host: {
+                    value: '',
+                    required: true,
+                    label: 'Host',
+                    validate: function (v) {
+                        return typeof v === 'string' && v.trim() !== '';
+                    },
+                },
+                port: {
+                    value: 5432,
+                    required: true,
+                    label: 'Port',
+                    validate: integerValidator('Port', 1, 65535),
+                },
+                database: {
+                    value: '',
+                    required: true,
+                    label: 'Database',
+                    validate: function (v) {
+                        return typeof v === 'string' && v.trim() !== '';
+                    },
+                },
+                username: {
+                    value: '',
+                    required: true,
+                    label: 'Username',
+                    validate: function (v) {
+                        return typeof v === 'string' && v.trim() !== '';
+                    },
+                },
+                ssl: { value: false },
+                allowSelfSigned: { value: false },
+                poolMax: {
+                    value: 10,
+                    required: true,
+                    label: 'Max connections',
+                    validate: integerValidator('Max connections', 1, 2147483647),
+                },
+                connectionTimeoutMs: {
+                    value: 10000,
+                    required: true,
+                    label: 'Connect timeout',
+                    validate: integerValidator('Connect timeout', 1, 2147483647),
+                },
+                idleTimeoutMs: {
+                    value: 30000,
+                    required: true,
+                    label: 'Idle timeout',
+                    validate: integerValidator('Idle timeout', 0, 2147483647),
+                },
+            },
+            credentials: {
+                password: { type: 'password' },
+            },
+            label: function () {
+                return this.name || this.database || 'SQL Connection';
+            },
+            oneditprepare: function () {
+                var defaultPorts = { postgres: 5432, mysql: 3306, mssql: 1433 };
+                var previousDriver = this.driver || 'postgres';
+
+                $('#node-config-input-driver').on('change', function () {
+                    var driver = $(this).val();
+                    var currentPort = Number($('#node-config-input-port').val());
+                    var previousDefault = defaultPorts[previousDriver];
+                    if (!currentPort || currentPort === previousDefault) {
+                        $('#node-config-input-port').val(defaultPorts[driver]);
+                    }
+                    previousDriver = driver;
+                });
+
+                function updateTlsRows() {
+                    $('#row-allow-self-signed').toggle($('#node-config-input-ssl').prop('checked'));
+                }
+
+                $('#node-config-input-ssl').on('change', updateTlsRows);
+                updateTlsRows();
+            },
+        });
+    })();
 </script>
 
-<link
-  rel="stylesheet"
-  href="resources/@faigle/node-red-runtime-utils/editor.css"
-/>
+<link rel="stylesheet" href="resources/@faigle/node-red-runtime-utils/editor.css" />
 
 <script type="text/html" data-template-name="database-sql-config">
-  <div class="faigle-node-editor">
-    <div class="form-row">
-      <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
-      <input
-        type="text"
-        id="node-config-input-name"
-        placeholder="SQL Connection"
-      />
+    <div class="faigle-node-editor">
+        <div class="form-row">
+            <label for="node-config-input-name">
+                <i class="fa fa-tag"></i>
+                Name
+            </label>
+            <input type="text" id="node-config-input-name" placeholder="SQL Connection" />
+        </div>
+
+        <fieldset class="node-red-fieldset">
+            <legend>Database</legend>
+            <div class="form-row">
+                <label for="node-config-input-driver">
+                    <i class="fa fa-database"></i>
+                    Driver
+                </label>
+                <select id="node-config-input-driver">
+                    <option value="postgres">PostgreSQL</option>
+                    <option value="mysql">MySQL / MariaDB</option>
+                    <option value="mssql">Microsoft SQL Server</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-host">
+                    <i class="fa fa-server"></i>
+                    Host
+                </label>
+                <input type="text" id="node-config-input-host" placeholder="db.example.com" />
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-port">
+                    <i class="fa fa-plug"></i>
+                    Port
+                </label>
+                <input type="number" id="node-config-input-port" min="1" max="65535" />
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-database">
+                    <i class="fa fa-database"></i>
+                    Database
+                </label>
+                <input type="text" id="node-config-input-database" placeholder="application" />
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-username">
+                    <i class="fa fa-user"></i>
+                    Username
+                </label>
+                <input type="text" id="node-config-input-username" />
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-password">
+                    <i class="fa fa-lock"></i>
+                    Password
+                </label>
+                <input type="password" id="node-config-input-password" />
+            </div>
+        </fieldset>
+
+        <fieldset class="node-red-fieldset">
+            <legend>TLS</legend>
+            <div class="form-row flex-checkbox-row">
+                <input type="checkbox" id="node-config-input-ssl" />
+                <label for="node-config-input-ssl">Use TLS / encrypted connection</label>
+            </div>
+            <div class="form-row flex-checkbox-row" id="row-allow-self-signed">
+                <input type="checkbox" id="node-config-input-allowSelfSigned" />
+                <label for="node-config-input-allowSelfSigned">
+                    Allow self-signed / untrusted server certificate
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="node-red-fieldset">
+            <legend>Connection Pool</legend>
+            <div class="form-row">
+                <label for="node-config-input-poolMax">
+                    <i class="fa fa-bars"></i>
+                    Max Connections
+                </label>
+                <input
+                    type="number"
+                    id="node-config-input-poolMax"
+                    min="1"
+                    step="1"
+                    max="2147483647"
+                />
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-connectionTimeoutMs">
+                    <i class="fa fa-clock-o"></i>
+                    Connect (ms)
+                </label>
+                <input
+                    type="number"
+                    id="node-config-input-connectionTimeoutMs"
+                    min="1"
+                    step="1"
+                    max="2147483647"
+                />
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-idleTimeoutMs">
+                    <i class="fa fa-clock-o"></i>
+                    Idle (ms)
+                </label>
+                <input
+                    type="number"
+                    id="node-config-input-idleTimeoutMs"
+                    min="0"
+                    step="1"
+                    max="2147483647"
+                />
+            </div>
+        </fieldset>
     </div>
-
-    <fieldset class="node-red-fieldset">
-      <legend>Database</legend>
-      <div class="form-row">
-        <label for="node-config-input-driver"
-          ><i class="fa fa-database"></i> Driver</label
-        >
-        <select id="node-config-input-driver">
-          <option value="postgres">PostgreSQL</option>
-          <option value="mysql">MySQL / MariaDB</option>
-          <option value="mssql">Microsoft SQL Server</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-host"
-          ><i class="fa fa-server"></i> Host</label
-        >
-        <input
-          type="text"
-          id="node-config-input-host"
-          placeholder="db.example.com"
-        />
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-port"
-          ><i class="fa fa-plug"></i> Port</label
-        >
-        <input type="number" id="node-config-input-port" min="1" max="65535" />
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-database"
-          ><i class="fa fa-database"></i> Database</label
-        >
-        <input
-          type="text"
-          id="node-config-input-database"
-          placeholder="application"
-        />
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-username"
-          ><i class="fa fa-user"></i> Username</label
-        >
-        <input type="text" id="node-config-input-username" />
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-password"
-          ><i class="fa fa-lock"></i> Password</label
-        >
-        <input type="password" id="node-config-input-password" />
-      </div>
-    </fieldset>
-
-    <fieldset class="node-red-fieldset">
-      <legend>TLS</legend>
-      <div class="form-row flex-checkbox-row">
-        <input type="checkbox" id="node-config-input-ssl" />
-        <label for="node-config-input-ssl"
-          >Use TLS / encrypted connection</label
-        >
-      </div>
-      <div class="form-row flex-checkbox-row" id="row-allow-self-signed">
-        <input type="checkbox" id="node-config-input-allowSelfSigned" />
-        <label for="node-config-input-allowSelfSigned"
-          >Allow self-signed / untrusted server certificate</label
-        >
-      </div>
-    </fieldset>
-
-    <fieldset class="node-red-fieldset">
-      <legend>Connection Pool</legend>
-      <div class="form-row">
-        <label for="node-config-input-poolMax"
-          ><i class="fa fa-bars"></i> Max Connections</label
-        >
-        <input
-          type="number"
-          id="node-config-input-poolMax"
-          min="1"
-          step="1"
-          max="2147483647"
-        />
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-connectionTimeoutMs"
-          ><i class="fa fa-clock-o"></i> Connect (ms)</label
-        >
-        <input
-          type="number"
-          id="node-config-input-connectionTimeoutMs"
-          min="1"
-          step="1"
-          max="2147483647"
-        />
-      </div>
-      <div class="form-row">
-        <label for="node-config-input-idleTimeoutMs"
-          ><i class="fa fa-clock-o"></i> Idle (ms)</label
-        >
-        <input
-          type="number"
-          id="node-config-input-idleTimeoutMs"
-          min="0"
-          step="1"
-          max="2147483647"
-        />
-      </div>
-    </fieldset>
-  </div>
 </script>
 
 <!-- @formatter:off -->
