@@ -42,7 +42,8 @@
     "prepare": "npx --yes husky",
     "test": "mocha \"test/**/*_spec.js\"",
     "format": "prettier --write \"**/*.{js,html,md}\"",
-    "lint": "eslint \"**/*.{js,html}\""
+    "lint": "eslint \"**/*.{js,html}\"",
+    "format:check": "prettier --check \"**/*.{js,html,md}\""
   },
   "lint-staged": {
     "*.{js,html,md}": "prettier --write",

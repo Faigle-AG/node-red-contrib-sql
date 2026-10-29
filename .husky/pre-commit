@@ -1,6 +1,19 @@
+branch=$(git symbolic-ref --quiet --short HEAD) || {
+    printf '%s\n' 'Commit blocked: cannot determine a branch. Check out an issue branch first.' >&2
+    exit 1
+}
+
+case "$branch" in
+    main|master)
+        printf 'Commit blocked: direct commits to %s are prohibited. Use an issue branch and PR.\n' "$branch" >&2
+        exit 1
+        ;;
+esac
+
 npm test
 npx lint-staged
+npm run lint
+npm run format:check
 
 npm version patch --no-git-tag-version
 git add package.json package-lock.json
-

@@ -1,3 +1,16 @@
 node_modules/
 package.json
 package-lock.json
+
+# Python virtual environments
+.venv*/
+venv*/
+
+# Imported framework and append-only coordination records.
+/.agents/
+/AGENTS.md
+
+# Build outputs
+dist/
+build/
+coverage/
