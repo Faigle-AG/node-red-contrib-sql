@@ -54,6 +54,24 @@ implementation and historical notes. Record supersessions; never rewrite history
 - Explicit user authorization required: Touch production data; delete/rewrite evidence; publish/deploy/restart services; destructive git/history operations; read private data outside workspace (home, shell history, credentials); write outside workspace or approved scratch (report accidental writes); build/test/run untrusted or suspect code (isolate it in sandbox).
 - Stricter harness permissions: Follow stricter harness permissions when present; never bypass them.
 
+## Domain policies (loaded just in time)
+
+- Large artifacts: Bounded inspection only; do not load whole large stores into context; prefer metadata, counts, queries, bounded windows, streaming hashes; state what was actually inspected (`.agents/policies/large-files-and-data.md`).
+- Compatibility: Version incompatible schemas, formats, releases, protocols, and public APIs; unsupported payloads fail clearly; no silent store migrations (`.agents/policies/versioning-and-compatibility.md`).
+- Dependencies & Secrets: Prefer stdlib/existing; new production dependencies require necessity and impact justification (`.agents/policies/dependencies.md`). Do not hand-edit generated/vendor/compiled files unless explicitly authoritative. Never expose, commit, or copy secrets/credentials into fixtures or documentation.
+- Planning: For substantial or high-risk changes, follow `.agents/PLANS.md`.
+
+## Project commands
+
+Owned by the adopting project and kept when the kit is updated. Component commands belong in nested `AGENTS.md`.
+- Install: `<command>`
+- Fast validation: `<command>`
+- Unit tests: `<command>`
+- Full verification: `<command>`
+- Lint: `<command>`
+- Format check: `<command>`
+- Build: `<command>`
+
 ## Roles
 
 Files are `.agents/roles/<name>.md`: implementer, challenger (reviewer), moderator (coordinator), architect, test-manager, repository-manager, documentation, security, release, data-database, research-ml. An agent may hold multiple explicitly assigned roles. Never silently assume one.
@@ -62,3 +80,5 @@ Files are `.agents/roles/<name>.md`: implementer, challenger (reviewer), moderat
 
 Vocabulary: `PLANNED`, `IMPLEMENTING`, `IMPLEMENTED`, `VERIFIED`, `REVIEW PENDING`, `ACCEPTED`, `INCOMPLETE`, `BLOCKED`, `DEFERRED`, `REJECTED`, `OUT OF SCOPE`, `UNRESOLVED`, `SUPERSEDED`.
 Do not claim COMPLETE/ACCEPTED while mandatory work or review remains.
+
+A task is complete only when all applicable acceptance, negative-test, compilation, integration/regression, compatibility, documentation, evidence, production-safety, and required-review gates are satisfied and the designated authority records completion (`.agents/policies/completion.md`). Otherwise use `INCOMPLETE`, `BLOCKED`, `DEFERRED`, or `REVIEW PENDING`.
