@@ -7,6 +7,12 @@
   ],
   "private": false,
   "license": "MIT",
+  "files": [
+    "src",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
   "node-red": {
     "nodes": {
       "sql-config": "src/sql-config.js",

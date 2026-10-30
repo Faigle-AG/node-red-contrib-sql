@@ -121,6 +121,12 @@ test('invalid fields return useful errors, including timeout overflow and invali
     n.output = 'payload[';
     assert.notEqual(validate(n, 'output'), true);
 });
+test('the query node uses the Database palette colour in the storage category', () => {
+    const { node } = loadEditors();
+    const definition = node('database-sql-query')._def;
+    assert.equal(definition.color, '#E9967A');
+    assert.equal(definition.category, 'storage');
+});
 test('missing saved type properties retain runtime-compatible defaults', () => {
     const { node, validate } = loadEditors();
     const n = node('database-sql-query');
