@@ -110,6 +110,8 @@ module.exports = function (RED) {
                         );
                     }
                 }
+                // The node may have closed while the statement and parameters were read.
+                if (closing) throw createError('SQL query node is closing', 'NODE_CLOSING');
                 const driver = node.configNode.driver || 'unknown';
                 node.status.processing(`querying ${driver}`);
 

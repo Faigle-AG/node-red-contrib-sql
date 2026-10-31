@@ -168,3 +168,9 @@ Query timeout applies to driver query execution. Connection setup and waiting fo
 Idle cleanup runs periodically. For MySQL, enabling idle cleanup also limits retained idle connections to one less than **Max Connections**. With a one-connection pool, its idle connection closes on the next cleanup cycle. Use idle timeout 0 to retain it.
 
 Connect a **Catch** node scoped to the **SQL - Query** node to handle connection, configuration, and query errors. Connect the Catch node to Debug to inspect the error message. Failed queries do not emit a successful result from the query node.
+
+### Query-node shutdown
+
+When a query node closes during redeploy or removal, it checks its closing state after resolving query options and before starting database execution. It also checks after query execution and after writing the result. A request that reaches a closing-state check reports `NODE_CLOSING` and is not forwarded as a successful result.
+
+Property-read, driver and output-write errors retain the existing SQL error normalization; they are not all replaced with `NODE_CLOSING`. Closing the query node does not cancel already-started database or context-store work, wait for every pending property read, or roll back its effects. A database write or context update may therefore finish even when no result message is sent. The shared SQL Connection node manages its pool separately. Check the database outcome before retrying a write after shutdown.

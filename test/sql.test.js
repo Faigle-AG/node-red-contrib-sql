@@ -35,7 +35,8 @@ function loadNode(file, overrides = {}, configNode) {
                 node.listeners = events.listeners.bind(events);
                 node.emit = events.emit.bind(events);
                 node.credentials = {};
-                node.status = () => {};
+                node.statuses = [];
+                node.status = (status) => node.statuses.push(status);
                 node.log = () => {};
                 node.error = () => {};
                 node.contextWrites = [];
@@ -395,5 +396,154 @@ test('flow and global outputs store data and statistics together', async () => {
         assert.equal(stored.value.rowCount, 1);
         assert.equal(stored.value.rowsAffected, 1);
         assert.equal(Object.hasOwn(result.sent[0], 'sql'), false);
+    }
+});
+
+// Starts a query node whose typed reads, execution and context writes can be held, so a test
+// can close the node at each boundary and then release it.
+function startQueries(config = {}, { execute, contextSet } = {}) {
+    const executed = [];
+    const Constructor = loadNode(
+        'sql-query.js',
+        {},
+        {
+            driver: 'postgres',
+            execute: async (...args) => {
+                executed.push(args);
+                return execute
+                    ? execute(...args)
+                    : { driver: 'postgres', rows: [{ id: 1 }], rowCount: 1, rowsAffected: 1 };
+            },
+        },
+    );
+    const node = new Constructor({ statement: 'SELECT 1', parameters: '', ...config });
+    if (contextSet) node.context = () => ({ flow: { set: contextSet } });
+    const reads = [];
+    node.getTypedProperty = (value, type) => {
+        const read = deferred();
+        reads.push({ value, type, ...read });
+        return read.promise;
+    };
+    const sent = [];
+    const completions = [];
+    const input = (msg = {}) =>
+        node.listeners('input')[0](
+            msg,
+            (m) => sent.push(m),
+            (err) => completions.push(err),
+        );
+    return { node, reads, executed, sent, completions, input };
+}
+
+// Lets awaited continuations run.
+const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+test('query close: a held statement read starts no execute and completes with NODE_CLOSING', async () => {
+    const q = startQueries();
+    const running = q.input();
+    q.node.emit('close');
+    const statusesAtClose = q.node.statuses.length;
+    q.reads[0].resolve('SELECT 1');
+    await running;
+    assert.equal(q.executed.length, 0);
+    assert.equal(q.sent.length, 0);
+    assert.equal(q.completions.length, 1);
+    assert.equal(q.completions[0].code, 'NODE_CLOSING');
+    assert.equal(q.node.statuses.length, statusesAtClose);
+});
+
+test('query close: a held parameters read starts no execute and completes with NODE_CLOSING', async () => {
+    const q = startQueries({ parameters: 'params', parametersType: 'msg' });
+    const running = q.input({ params: [1] });
+    q.reads[0].resolve('SELECT $1');
+    await settle();
+    assert.equal(q.reads.length, 2);
+    q.node.emit('close');
+    const statusesAtClose = q.node.statuses.length;
+    q.reads[1].resolve([1]);
+    await running;
+    assert.equal(q.executed.length, 0);
+    assert.equal(q.sent.length, 0);
+    assert.deepEqual(
+        q.completions.map((err) => err.code),
+        ['NODE_CLOSING'],
+    );
+    assert.equal(q.node.statuses.length, statusesAtClose);
+});
+
+test('query close: concurrent held reads all complete with NODE_CLOSING and none executes', async () => {
+    const q = startQueries();
+    const running = [q.input(), q.input()];
+    q.node.emit('close');
+    for (const read of q.reads) read.resolve('SELECT 1');
+    await Promise.all(running);
+    assert.equal(q.executed.length, 0);
+    assert.equal(q.sent.length, 0);
+    assert.deepEqual(
+        q.completions.map((err) => err.code),
+        ['NODE_CLOSING', 'NODE_CLOSING'],
+    );
+});
+
+// Controls: these pass before and after the pre-execute guard.
+
+test('query close: a held read that rejects after close completes with its own error and no failed status', async () => {
+    const q = startQueries();
+    const running = q.input();
+    q.node.emit('close');
+    const statusesAtClose = q.node.statuses.length;
+    const readError = Object.assign(new Error('read failed'), { code: 'READ_FAILED' });
+    q.reads[0].reject(readError);
+    await running;
+    assert.equal(q.executed.length, 0);
+    assert.equal(q.completions.length, 1);
+    assert.equal(q.completions[0].cause, readError);
+    assert.equal(q.completions[0].code, 'READ_FAILED');
+    assert.equal(q.node.statuses.length, statusesAtClose);
+});
+
+test('query close: input after close completes with NODE_CLOSING before any read', async () => {
+    const q = startQueries();
+    q.node.emit('close');
+    await q.input();
+    assert.equal(q.reads.length, 0);
+    assert.equal(q.executed.length, 0);
+    assert.equal(q.completions[0].code, 'NODE_CLOSING');
+});
+
+test('query close: a held execute that resolves after close sends nothing', async () => {
+    const execution = deferred();
+    const q = startQueries({}, { execute: () => execution.promise });
+    const running = q.input();
+    q.reads[0].resolve('SELECT 1');
+    await settle();
+    assert.equal(q.executed.length, 1);
+    q.node.emit('close');
+    execution.resolve({ driver: 'postgres', rows: [], rowCount: 0, rowsAffected: 0 });
+    await running;
+    assert.equal(q.sent.length, 0);
+    assert.equal(q.completions[0].code, 'NODE_CLOSING');
+});
+
+test('query close: a held context write sends nothing after close, and its late error passes through', async () => {
+    for (const writeError of [null, Object.assign(new Error('store failed'), { code: 'STORE' })]) {
+        let release;
+        const q = startQueries(
+            { output: 'result', outputType: 'flow' },
+            { contextSet: (key, value, store, cb) => (release = () => cb(writeError)) },
+        );
+        const running = q.input();
+        q.reads[0].resolve('SELECT 1');
+        await settle();
+        assert.equal(typeof release, 'function');
+        q.node.emit('close');
+        const statusesAtClose = q.node.statuses.length;
+        release();
+        await running;
+        assert.equal(q.sent.length, 0);
+        assert.equal(q.completions.length, 1);
+        if (writeError) assert.equal(q.completions[0].cause, writeError);
+        else assert.equal(q.completions[0].code, 'NODE_CLOSING');
+        assert.equal(q.node.statuses.length, statusesAtClose);
     }
 });
