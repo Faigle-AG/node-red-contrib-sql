@@ -1,62 +1,98 @@
 [
-  {
-    "id": "sqlms001",
-    "type": "inject",
-    "name": "Find customer",
-    "props": [
-      {
-        "p": "params",
-        "v": "{\"id\": \"K0001\"}",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 0.1,
-    "topic": "",
-    "x": 160,
-    "y": 120,
-    "wires": [
-      [
-        "sqlms002"
-      ]
-    ]
-  },
-  {
-    "id": "sqlms002",
-    "type": "database-sql-query",
-    "name": "SQL Server customer query",
-    "config": "sqlms000",
-    "statement": "SELECT * FROM customers WHERE id = @id",
-    "statementType": "str",
-    "parameters": "params",
-    "parametersType": "msg",
-    "output": "payload",
-    "outputType": "msg",
-    "timeoutMs": 30000,
-    "enableLogging": false,
-    "x": 430,
-    "y": 120,
-    "wires": [
-      [
-        "sqlms003"
-      ]
-    ]
-  },
-  {
-    "id": "sqlms003",
-    "type": "debug",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "payload",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 730,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "sqlmst00",
+        "type": "tab",
+        "label": "sql 03 \u00b7 SQL Server parameterized query",
+        "disabled": true,
+        "info": "**Find one customer with a parameterized SQL Server query**\n\nThe inject sets `msg.params` to `{\"id\": \"K0001\"}`, and the query node runs `SELECT * FROM customers WHERE id = @id`\nwith those parameters (read-only). The result goes to `msg.payload`: `data` (the rows), `rowCount` and the driver details.\n\n**Prerequisites:** the `@faigle/node-red-contrib-sql` package, and a **disposable** database you may query, with a\n`customers` table holding a synthetic row whose `id` is `K0001`.\n\n**Setup:** open the configuration node **EDIT ME: SQL Server example connection** and replace the placeholders:\nhost, port, database and user, and enter your password in its credentials. This example contains no password.\nThe shipped `edit-me.invalid` host is a reserved placeholder name, **not a network-denial boundary**: enabling the tab lets the node start\nconnection activity, so point it at a disposable database before you enable the tab.\n\n**Activation:** this tab is disabled, and its connection is on the same tab, so deploying opens no connection. Enable the tab, deploy, then click **Find customer**.\n\n**Effects:** one read-only SELECT per click. The connection pool stays open until the flow is stopped.\n\n**Expected result:** the Debug sidebar shows `msg.payload` with the matching row.\n\n**Cleanup:** none in the database; disable the tab when you are done.\n\n**Not verified:** a real database (the driver is faked in the tests), TLS settings, and behaviour in the editor."
+    },
+    {
+        "id": "sqlmsc00",
+        "type": "comment",
+        "z": "sqlmst00",
+        "name": "SQL Server parameterized query (see the tab's description)",
+        "info": "**Find one customer with a parameterized SQL Server query**\n\nThe inject sets `msg.params` to `{\"id\": \"K0001\"}`, and the query node runs `SELECT * FROM customers WHERE id = @id`\nwith those parameters (read-only). The result goes to `msg.payload`: `data` (the rows), `rowCount` and the driver details.\n\n**Prerequisites:** the `@faigle/node-red-contrib-sql` package, and a **disposable** database you may query, with a\n`customers` table holding a synthetic row whose `id` is `K0001`.\n\n**Setup:** open the configuration node **EDIT ME: SQL Server example connection** and replace the placeholders:\nhost, port, database and user, and enter your password in its credentials. This example contains no password.\nThe shipped `edit-me.invalid` host is a reserved placeholder name, **not a network-denial boundary**: enabling the tab lets the node start\nconnection activity, so point it at a disposable database before you enable the tab.\n\n**Activation:** this tab is disabled, and its connection is on the same tab, so deploying opens no connection. Enable the tab, deploy, then click **Find customer**.\n\n**Effects:** one read-only SELECT per click. The connection pool stays open until the flow is stopped.\n\n**Expected result:** the Debug sidebar shows `msg.payload` with the matching row.\n\n**Cleanup:** none in the database; disable the tab when you are done.\n\n**Not verified:** a real database (the driver is faked in the tests), TLS settings, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "sqlms000",
+        "type": "database-sql-config",
+        "z": "sqlmst00",
+        "name": "EDIT ME: SQL Server example connection",
+        "driver": "mssql",
+        "host": "edit-me.invalid",
+        "port": 1433,
+        "database": "edit_me_database",
+        "username": "edit_me_user",
+        "ssl": false,
+        "allowSelfSigned": false,
+        "poolMax": 10,
+        "connectionTimeoutMs": 10000,
+        "idleTimeoutMs": 30000
+    },
+    {
+        "id": "sqlms001",
+        "type": "inject",
+        "name": "Find customer",
+        "props": [
+            {
+                "p": "params",
+                "v": "{\"id\": \"K0001\"}",
+                "vt": "json"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "sqlms002"
+            ]
+        ],
+        "z": "sqlmst00"
+    },
+    {
+        "id": "sqlms002",
+        "type": "database-sql-query",
+        "name": "SQL Server customer query",
+        "config": "sqlms000",
+        "statement": "SELECT * FROM customers WHERE id = @id",
+        "statementType": "str",
+        "parameters": "params",
+        "parametersType": "msg",
+        "output": "payload",
+        "outputType": "msg",
+        "timeoutMs": 30000,
+        "enableLogging": false,
+        "x": 430,
+        "y": 120,
+        "wires": [
+            [
+                "sqlms003"
+            ]
+        ],
+        "z": "sqlmst00"
+    },
+    {
+        "id": "sqlms003",
+        "type": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 120,
+        "wires": [],
+        "z": "sqlmst00"
+    }
 ]

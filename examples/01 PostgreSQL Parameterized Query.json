@@ -1,62 +1,98 @@
 [
-  {
-    "id": "sqlpg001",
-    "type": "inject",
-    "name": "Find customer",
-    "props": [
-      {
-        "p": "params",
-        "v": "[\"K0001\"]",
-        "vt": "json"
-      }
-    ],
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "onceDelay": 0.1,
-    "topic": "",
-    "x": 160,
-    "y": 120,
-    "wires": [
-      [
-        "sqlpg002"
-      ]
-    ]
-  },
-  {
-    "id": "sqlpg002",
-    "type": "database-sql-query",
-    "name": "PostgreSQL customer query",
-    "config": "sqlpg000",
-    "statement": "SELECT * FROM customers WHERE id = $1",
-    "statementType": "str",
-    "parameters": "params",
-    "parametersType": "msg",
-    "output": "payload",
-    "outputType": "msg",
-    "timeoutMs": 30000,
-    "enableLogging": false,
-    "x": 430,
-    "y": 120,
-    "wires": [
-      [
-        "sqlpg003"
-      ]
-    ]
-  },
-  {
-    "id": "sqlpg003",
-    "type": "debug",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "payload",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 730,
-    "y": 120,
-    "wires": []
-  }
+    {
+        "id": "sqlpgt00",
+        "type": "tab",
+        "label": "sql 01 \u00b7 PostgreSQL parameterized query",
+        "disabled": true,
+        "info": "**Find one customer with a parameterized PostgreSQL query**\n\nThe inject sets `msg.params` to `[\"K0001\"]`, and the query node runs `SELECT * FROM customers WHERE id = $1`\nwith those parameters (read-only). The result goes to `msg.payload`: `data` (the rows), `rowCount` and the driver details.\n\n**Prerequisites:** the `@faigle/node-red-contrib-sql` package, and a **disposable** database you may query, with a\n`customers` table holding a synthetic row whose `id` is `K0001`.\n\n**Setup:** open the configuration node **EDIT ME: PostgreSQL example connection** and replace the placeholders:\nhost, port, database and user, and enter your password in its credentials. This example contains no password.\nThe shipped `edit-me.invalid` host is a reserved placeholder name, **not a network-denial boundary**: enabling the tab lets the node start\nconnection activity, so point it at a disposable database before you enable the tab.\n\n**Activation:** this tab is disabled, and its connection is on the same tab, so deploying opens no connection. Enable the tab, deploy, then click **Find customer**.\n\n**Effects:** one read-only SELECT per click. The connection pool stays open until the flow is stopped.\n\n**Expected result:** the Debug sidebar shows `msg.payload` with the matching row.\n\n**Cleanup:** none in the database; disable the tab when you are done.\n\n**Not verified:** a real database (the driver is faked in the tests), TLS settings, and behaviour in the editor."
+    },
+    {
+        "id": "sqlpgc00",
+        "type": "comment",
+        "z": "sqlpgt00",
+        "name": "PostgreSQL parameterized query (see the tab's description)",
+        "info": "**Find one customer with a parameterized PostgreSQL query**\n\nThe inject sets `msg.params` to `[\"K0001\"]`, and the query node runs `SELECT * FROM customers WHERE id = $1`\nwith those parameters (read-only). The result goes to `msg.payload`: `data` (the rows), `rowCount` and the driver details.\n\n**Prerequisites:** the `@faigle/node-red-contrib-sql` package, and a **disposable** database you may query, with a\n`customers` table holding a synthetic row whose `id` is `K0001`.\n\n**Setup:** open the configuration node **EDIT ME: PostgreSQL example connection** and replace the placeholders:\nhost, port, database and user, and enter your password in its credentials. This example contains no password.\nThe shipped `edit-me.invalid` host is a reserved placeholder name, **not a network-denial boundary**: enabling the tab lets the node start\nconnection activity, so point it at a disposable database before you enable the tab.\n\n**Activation:** this tab is disabled, and its connection is on the same tab, so deploying opens no connection. Enable the tab, deploy, then click **Find customer**.\n\n**Effects:** one read-only SELECT per click. The connection pool stays open until the flow is stopped.\n\n**Expected result:** the Debug sidebar shows `msg.payload` with the matching row.\n\n**Cleanup:** none in the database; disable the tab when you are done.\n\n**Not verified:** a real database (the driver is faked in the tests), TLS settings, and behaviour in the editor.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "sqlpg000",
+        "type": "database-sql-config",
+        "z": "sqlpgt00",
+        "name": "EDIT ME: PostgreSQL example connection",
+        "driver": "postgres",
+        "host": "edit-me.invalid",
+        "port": 5432,
+        "database": "edit_me_database",
+        "username": "edit_me_user",
+        "ssl": false,
+        "allowSelfSigned": false,
+        "poolMax": 10,
+        "connectionTimeoutMs": 10000,
+        "idleTimeoutMs": 30000
+    },
+    {
+        "id": "sqlpg001",
+        "type": "inject",
+        "name": "Find customer",
+        "props": [
+            {
+                "p": "params",
+                "v": "[\"K0001\"]",
+                "vt": "json"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "sqlpg002"
+            ]
+        ],
+        "z": "sqlpgt00"
+    },
+    {
+        "id": "sqlpg002",
+        "type": "database-sql-query",
+        "name": "PostgreSQL customer query",
+        "config": "sqlpg000",
+        "statement": "SELECT * FROM customers WHERE id = $1",
+        "statementType": "str",
+        "parameters": "params",
+        "parametersType": "msg",
+        "output": "payload",
+        "outputType": "msg",
+        "timeoutMs": 30000,
+        "enableLogging": false,
+        "x": 430,
+        "y": 120,
+        "wires": [
+            [
+                "sqlpg003"
+            ]
+        ],
+        "z": "sqlpgt00"
+    },
+    {
+        "id": "sqlpg003",
+        "type": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 120,
+        "wires": [],
+        "z": "sqlpgt00"
+    }
 ]
