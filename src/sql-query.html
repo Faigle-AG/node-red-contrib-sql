@@ -53,7 +53,7 @@
                     validate: typedValidator(
                         'statementType',
                         'str',
-                        ['str', 'msg', 'flow', 'global', 'jsonata', 'env'],
+                        ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
                         false,
                     ),
                 },
@@ -94,7 +94,7 @@
             oneditprepare: function () {
                 $('#node-input-statement').typedInput({
                     default: 'str',
-                    types: ['str', 'msg', 'flow', 'global', 'jsonata', 'env'],
+                    types: ['msg', 'flow', 'global', 'str', 'jsonata', 'env'],
                     typeField: $('#node-input-statementType'),
                 });
                 $('#node-input-parameters').typedInput({

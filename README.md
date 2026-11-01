@@ -65,6 +65,22 @@ To read SQL from `msg.topic`, select the `msg` type for **SQL** and enter `topic
 
 Each incoming message runs one query. The selected output always contains both the returned rows in `data` and the query statistics.
 
+### Typed-input reference
+
+The offered types are listed in editor order. Defaults below describe newly configured editor nodes, not migrations of saved flows.
+
+| Field                | Offered types                                     | Editor default    |
+| -------------------- | ------------------------------------------------- | ----------------- |
+| `statement` (SQL)    | `msg`, `flow`, `global`, `str`, `jsonata`, `env`  | `str`, `SELECT 1` |
+| `parameters`         | `msg`, `flow`, `global`, `json`, `jsonata`, `env` | `msg`, `params`   |
+| `output` (Output To) | `msg`, `flow`, `global`                           | `msg`, `payload`  |
+
+Reordering the SQL dropdown does not change its `str` default or the existing runtime allowlist. Unsupported query-property types are rejected before execution with `INVALID_CONFIGURATION` through the existing `SqlQueryError` normalization. Output-key validation, result shape and shutdown behavior are unchanged.
+
+Saved flows without type tags retain the runtime defaults `str`, `msg` and `msg`, respectively. Missing or null `parameters` falls back to `params`; an explicitly blank parameter setting skips the read. Missing or empty `output` falls back to `payload`. The editor's `SELECT 1` value is not supplied by the runtime when a saved statement is absent.
+
+For `flow` or `global`, a named context store uses Node-RED's encoded key syntax, for example `#:(storeName)::result`. Configure that store in Node-RED; its availability and persistence are the backend's responsibility. Output keys are validated before querying, but a later context-store write can still fail after the database has executed the statement; this is not a rollback guarantee.
+
 ## Parameterized queries
 
 Keep values separate from SQL text. The placeholder syntax depends on the database.
